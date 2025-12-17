@@ -54,25 +54,42 @@ export function ServiceNode({ data, selected }: NodeProps<ServiceNodeData>) {
                 </div>
             </div>
 
+            
             {/* Metrics Row */}
             <div className="flex items-center justify-between border-b border-white/[0.04] px-3 py-2">
-                <div className="flex items-center gap-1 rounded-full bg-white px-2 py-1 text-[10px] font-semibold text-black">
-                    <Activity size={10} />
+                <div className="flex items-center justify-center text-[10px] font-medium text-gray-400 min-w-[48px]">
                     <span>{data.metrics.cpu.toFixed(2)}</span>
                 </div>
-                <div className="flex items-center gap-1 text-[10px] font-medium text-gray-400">
-                    <Database size={10} />
+                <div className="flex items-center justify-center text-[10px] font-medium text-gray-400 min-w-[52px]">
                     <span>{data.metrics.memory.toFixed(2)} GB</span>
                 </div>
-                <div className="flex items-center gap-1 text-[10px] font-medium text-gray-400">
-                    <HardDrive size={10} />
+                <div className="flex items-center justify-center text-[10px] font-medium text-gray-400 min-w-[46px]">
                     <span>{data.metrics.disk} GB</span>
                 </div>
-                <div className="flex items-center gap-1 text-[10px] font-medium text-gray-400">
-                    <Globe size={10} />
+                <div className="flex items-center justify-center text-[10px] font-medium text-gray-400 min-w-[62px]">
                     <span>{data.metrics.region}</span>
                 </div>
             </div>
+            {/* Labels Row */}
+            <div className="flex items-center justify-between border-b border-white/[0.04] px-3 py-1.5">
+                <div className="flex items-center gap-1  rounded-full bg-white px-2.5 py-1 ">
+                    <Activity size={10} className="text-black"/>
+                    <span className="text-[9px] font-semibold text-black">CPU</span>
+                </div>
+                <div className="flex items-center gap-1">
+                    <Database size={10} className="text-gray-500" />
+                    <span className="text-[9px] font-medium text-gray-500">Memory</span>
+                </div>
+                <div className="flex items-center gap-1">
+                    <HardDrive size={10} className="text-gray-500" />
+                    <span className="text-[9px] font-medium text-gray-500">Disk</span>
+                </div>
+                <div className="flex items-center gap-1">
+                    <Globe size={10} className="text-gray-500" />
+                    <span className="text-[9px] font-medium text-gray-500">Region</span>
+                </div>
+            </div>
+
 
             {/* Slider Section */}
             <div className="flex items-center justify-between px-3 py-2">
