@@ -13,10 +13,9 @@ import {
 
 interface TopBarProps {
   onFitView?: () => void
-  isLoadingGraph: boolean
 }
 
-export function TopBar({ onFitView, isLoadingGraph }: TopBarProps) {
+export function TopBar({ onFitView }: TopBarProps) {
   const shouldFail = useUIStore((s) => s.shouldFail)
   const setShouldFail = useUIStore((s) => s.setShouldFail)
   const toggleMobilePanel = useUIStore((s) => s.toggleMobilePanel)

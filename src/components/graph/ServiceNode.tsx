@@ -1,34 +1,17 @@
 import type { NodeProps } from 'reactflow'
 import { Badge } from '../ui/badge'
 import { cn } from '../../lib/utils'
-import { Activity, CheckCircle2, AlertTriangle, XCircle, Database, Server, HardDrive, Globe, Settings } from 'lucide-react'
+import { Activity, CheckCircle2, AlertTriangle, XCircle, HardDrive, Globe, Settings } from 'lucide-react'
 import type { ServiceNodeData } from '../../types'
-import postgresLogo from '../../assets/postgresql.png'
-import redisLogo from '../../assets/redis.png'
-import mongodbLogo from '../../assets/mongodb.png'
+import { getServiceLogo } from '../../utils/getServiceLogo'
+import { FaDatabase } from 'react-icons/fa'
 
 export function ServiceNode({ data, selected }: NodeProps<ServiceNodeData>) {
-    const getServiceLogo = () => {
-        switch (data.name.toLowerCase()) {
-            case 'postgres':
-                return <img src={postgresLogo} alt="PostgreSQL" className="h-6 w-6 object-contain " />
-            case 'redis':
-                return <img src={redisLogo} alt="Redis" className="h-6 w-6 object-contain " />
-            case 'mongodb':
-                return <img src={mongodbLogo} alt="MongoDB" className="h-6 w-6 object-contain " />
-            default:
-                return data.kind === 'database' ? (
-                    <Database size={14} className="text-blue-400" />
-                ) : (
-                    <Server size={14} className="text-purple-400" />
-                )
-        }
-    }
 
     return (
         <div
             className={cn(
-                'group relative w-[280px] rounded-xl border transition-all duration-200',
+                'group relative w-[240px] sm:w-[280px] rounded-xl border transition-all duration-200',
                 'shadow-[0_4px_16px_rgba(0,0,0,0.4)]',
                 selected ? 'border-white/[0.08] shadow-[0_0_0_1px_rgba(255,255,255,0.1)]' : 'border-white/[0.04]',
             )}
@@ -40,7 +23,7 @@ export function ServiceNode({ data, selected }: NodeProps<ServiceNodeData>) {
             <div className="flex items-center justify-between border-b border-white/[0.04] px-3 py-2">
                 <div className="flex items-center gap-2">
                     <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white">
-                        {getServiceLogo()}
+                        {getServiceLogo({ serviceName: data.name, kind: data.kind, size: 'small' })}
                     </div>
                     <h3 className="text-xs font-medium text-white">{data.name}</h3>
                 </div>
@@ -77,7 +60,7 @@ export function ServiceNode({ data, selected }: NodeProps<ServiceNodeData>) {
                     <span className="text-[9px] font-semibold text-black">CPU</span>
                 </div>
                 <div className="flex items-center gap-1">
-                    <Database size={10} className="text-gray-500" />
+                    <FaDatabase size={10} className="text-gray-500" />
                     <span className="text-[9px] font-medium text-gray-500">Memory</span>
                 </div>
                 <div className="flex items-center gap-1">

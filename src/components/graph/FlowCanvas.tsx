@@ -57,7 +57,6 @@ export function FlowCanvas({
         className="[&_.react-flow__pane]:!cursor-grab"
       >
         <Background color="rgba(137, 145, 157, 0.12)" size={2} gap={18} variant={BackgroundVariant.Dots} />
-        <Controls position="top-right" showInteractive={false} className="rounded-lg border border-white/[0.06] bg-[rgb(15,20,27)] shadow-lg" />
       </ReactFlow>
 
       {isLoading && (

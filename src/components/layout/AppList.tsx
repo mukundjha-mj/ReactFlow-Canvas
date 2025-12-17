@@ -2,10 +2,38 @@ import { useMemo, useState } from 'react'
 import { Button } from '../ui/button'
 import { Input } from '../ui/input'
 import { Skeleton } from '../ui/skeleton'
-import { Badge } from '../ui/badge'
 import type { AppInfo } from '../../types'
 import { cn } from '../../lib/utils'
-import { Plus, RefreshCw, Search, TriangleAlert } from 'lucide-react'
+import { Plus, RefreshCw, Search, TriangleAlert, ChevronDown, MoreVertical, ChevronRight, Zap, Cloud, Sparkles, Rocket, Network, Shield, Box, Workflow, Layers } from 'lucide-react'
+import { SiGo } from 'react-icons/si'
+
+const getAppIcon = (iconName?: string) => {
+  const iconClass = "h-4 w-4"
+  switch (iconName) {
+    case 'bolt':
+      return <Zap className={iconClass} />
+    case 'go':
+      return <SiGo className={iconClass} />
+    case 'shield':
+      return <Shield className={iconClass} />
+    case 'cloud':
+      return <Cloud className={iconClass} />
+    case 'sparkle':
+      return <Sparkles className={iconClass} />
+    case 'boxes':
+      return <Box className={iconClass} />
+    case 'rocket':
+      return <Rocket className={iconClass} />
+    case 'pipeline':
+      return <Workflow className={iconClass} />
+    case 'network':
+      return <Network className={iconClass} />
+    case 'edge':
+      return <Layers className={iconClass} />
+    default:
+      return <Zap className={iconClass} />
+  }
+}
 
 interface AppListProps {
   apps?: AppInfo[]
@@ -30,21 +58,15 @@ export function AppList({ apps, isLoading, isError, onRetry, selectedAppId, onSe
       <div className="flex items-center justify-between rounded-lg border border-white/[0.08] bg-[rgb(15,20,27)] px-3 py-2">
         <div className="flex flex-1 items-center gap-2.5">
           <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-white">
-            <span className="text-sm">⚡</span>
+            {getAppIcon(apps?.find(app => app.id === selectedAppId)?.icon)}
           </div>
           <span className="flex-1 text-sm font-medium text-white">
             {apps?.find(app => app.id === selectedAppId)?.name || 'supertokens-golang'}
           </span>
-          <svg className="h-4 w-4 text-[rgb(154,164,178)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-          </svg>
+          <ChevronDown className="h-4 w-4 text-[rgb(154,164,178)]" />
         </div>
         <button className="ml-2 flex h-6 w-6 items-center justify-center rounded text-[rgb(154,164,178)] hover:bg-white/[0.04]">
-          <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
-            <circle cx="12" cy="5" r="1.5" />
-            <circle cx="12" cy="12" r="1.5" />
-            <circle cx="12" cy="19" r="1.5" />
-          </svg>
+          <MoreVertical className="h-4 w-4" />
         </button>
       </div>
 
@@ -112,7 +134,7 @@ export function AppList({ apps, isLoading, isError, onRetry, selectedAppId, onSe
                   selectedAppId === app.id ? 'bg-primary shadow-md' : 'bg-gradient-to-br from-primary/80 to-primary/60',
                 )}
               >
-                ⚡
+                {getAppIcon(app.icon)}
               </div>
               <span
                 className={cn(
@@ -122,17 +144,12 @@ export function AppList({ apps, isLoading, isError, onRetry, selectedAppId, onSe
               >
                 {app.name}
               </span>
-              <svg
+              <ChevronRight
                 className={cn(
                   'h-4 w-4 shrink-0 transition-colors',
                   selectedAppId === app.id ? 'text-primary' : 'text-[rgb(154,164,178)] group-hover:text-white',
                 )}
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
+              />
             </button>
           ))}
         </div>
