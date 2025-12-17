@@ -1,6 +1,5 @@
 import {
   Background,
-  Controls,
   ReactFlow,
   BackgroundVariant,
   type ReactFlowInstance,
