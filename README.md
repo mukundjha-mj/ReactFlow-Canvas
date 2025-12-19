@@ -48,44 +48,43 @@ A modern, interactive application graph builder featuring a visual node editor f
 ### System Architecture Overview
 
 ```mermaid
-%%{init: {'theme':'base', 'themeVariables': { 'primaryColor':'#3b82f6','primaryTextColor':'#1e293b','primaryBorderColor':'#2563eb','lineColor':'#64748b','secondaryColor':'#8b5cf6','tertiaryColor':'#10b981','fontSize':'16px','fontFamily':'Arial'}}}%%
 graph TB
-    subgraph UserLayer["🎯 User Layer"]
-        User["👤 User Interaction<br/><b>Click • Drag • Keyboard</b>"]
+    subgraph "User Layer"
+        User[👤 User Interaction<br/>Click, Drag, Keyboard]
     end
 
-    subgraph ReactLayer["⚛️ React Application Layer"]
-        App["<b>App.tsx</b><br/>Main Orchestrator"]
+    subgraph "React Application Layer"
+        App[App.tsx<br/>Main Component]
     end
 
-    subgraph StateLayer["💾 State Management Layer"]
-        Zustand["<b>🔄 Zustand Store</b><br/>• selectedAppId<br/>• selectedNodeId<br/>• isMobilePanelOpen"]
-        Query["<b>⚡ TanStack Query</b><br/>Cache & Async State"]
+    subgraph "State Management Layer"
+        Zustand[Zustand Store<br/>selectedAppId, selectedNodeId<br/>isMobilePanelOpen]
+        Query[TanStack Query<br/>Cache & Data Fetching]
     end
 
-    subgraph ComponentLayer["🎨 Component Layer"]
-        TopBar["<b>TopActions</b><br/>Theme • Fit View"]
-        Dropdown["<b>AppDropdown</b><br/>App Selector"]
-        Canvas["<b>ReactFlow Canvas</b><br/>FlowCanvas.tsx"]
-        ServiceNode["<b>ServiceNode</b><br/>Custom Component"]
-        IconRail["<b>ServiceIconRail</b><br/>Quick Navigation"]
-        Inspector["<b>NodeInspector</b><br/>⏱️ Debounced 300ms"]
+    subgraph "Component Layer"
+        TopBar[TopActions<br/>Theme, Fit View]
+        Dropdown[AppDropdown<br/>App Selector]
+        Canvas[ReactFlow Canvas<br/>FlowCanvas.tsx]
+        ServiceNode[ServiceNode<br/>Custom Node]
+        IconRail[ServiceIconRail<br/>Navigation]
+        Inspector[NodeInspector<br/>Debounced Editor]
     end
 
-    subgraph NodeTypes["🔷 Node Type System"]
-        ServiceType["<b>Service Node</b><br/>🔵 Blue Theme"]
-        DatabaseType["<b>Database Node</b><br/>🟣 Purple Theme"]
+    subgraph "Node Types"
+        ServiceType[Service Node<br/>Blue Theme]
+        DatabaseType[Database Node<br/>Purple Theme]
     end
 
-    subgraph DataLayer["📊 Data Layer"]
-        MockAPI["<b>Mock API</b><br/>mockApi.ts<br/>5 Demo Applications"]
+    subgraph "Data Layer"
+        MockAPI[Mock API<br/>mockApi.ts<br/>5 Demo Apps]
     end
 
-    User ==>|"User Actions"| App
-    App ==>|"State Updates"| Zustand
-    App ==>|"Data Queries"| Query
-    Query <-->|"Fetch/Mutate"| MockAPI
-    Zustand -->|"Invalidations"| Query
+    User -->|Interact| App
+    App -->|Manages| Zustand
+    App -->|Queries| Query
+    Query <-->|Fetch/Cache| MockAPI
+    Zustand -->|State Updates| Query
     
     App --> TopBar
     App --> Dropdown
@@ -93,32 +92,28 @@ graph TB
     App --> IconRail
     App --> Inspector
     
-    Canvas ==> ServiceNode
+    Canvas --> ServiceNode
     ServiceNode --> ServiceType
     ServiceNode --> DatabaseType
     
-    Inspector -.->|"Debounced Updates"| Zustand
-    TopBar -.->|"Actions"| Zustand
-    Dropdown -.->|"Selection"| Zustand
-    IconRail -.->|"Navigation"| Zustand
+    Inspector -->|Debounced 300ms| Zustand
+    TopBar -->|Actions| Zustand
+    Dropdown -->|Selection| Zustand
+    IconRail -->|Navigation| Zustand
 
-    classDef userStyle fill:#3b82f6,stroke:#1e40af,stroke-width:3px,color:#fff
-    classDef appStyle fill:#ec4899,stroke:#be185d,stroke-width:3px,color:#fff
-    classDef stateStyle fill:#f59e0b,stroke:#d97706,stroke-width:3px,color:#fff
-    classDef componentStyle fill:#10b981,stroke:#059669,stroke-width:2px,color:#fff
-    classDef nodeStyle fill:#8b5cf6,stroke:#6d28d9,stroke-width:2px,color:#fff
-    classDef dataStyle fill:#6366f1,stroke:#4f46e5,stroke-width:3px,color:#fff
-    classDef serviceNodeStyle fill:#60a5fa,stroke:#2563eb,stroke-width:2px,color:#1e293b
-    classDef dbNodeStyle fill:#c084fc,stroke:#9333ea,stroke-width:2px,color:#1e293b
-
-    class User userStyle
-    class App appStyle
-    class Zustand,Query stateStyle
-    class TopBar,Dropdown,Canvas,IconRail,Inspector componentStyle
-    class ServiceNode nodeStyle
-    class MockAPI dataStyle
-    class ServiceType serviceNodeStyle
-    class DatabaseType dbNodeStyle
+    style User fill:#3b82f6,stroke:#1e40af,stroke-width:3px,color:#ffffff
+    style App fill:#ec4899,stroke:#be185d,stroke-width:3px,color:#ffffff
+    style Zustand fill:#f59e0b,stroke:#d97706,stroke-width:3px,color:#ffffff
+    style Query fill:#8b5cf6,stroke:#6d28d9,stroke-width:3px,color:#ffffff
+    style MockAPI fill:#6366f1,stroke:#4f46e5,stroke-width:3px,color:#ffffff
+    style TopBar fill:#10b981,stroke:#059669,stroke-width:2px,color:#ffffff
+    style Dropdown fill:#10b981,stroke:#059669,stroke-width:2px,color:#ffffff
+    style Canvas fill:#10b981,stroke:#059669,stroke-width:2px,color:#ffffff
+    style ServiceNode fill:#10b981,stroke:#059669,stroke-width:2px,color:#ffffff
+    style IconRail fill:#10b981,stroke:#059669,stroke-width:2px,color:#ffffff
+    style Inspector fill:#10b981,stroke:#059669,stroke-width:2px,color:#ffffff
+    style ServiceType fill:#60a5fa,stroke:#2563eb,stroke-width:2px,color:#ffffff
+    style DatabaseType fill:#c084fc,stroke:#9333ea,stroke-width:2px,color:#ffffff
 ```
 
 **Component Interaction Flow:**
