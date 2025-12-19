@@ -1,12 +1,12 @@
 import { useMemo, useState } from 'react'
 import { Button } from '../ui/button'
-import { Input } from '../ui/input'
 import { Skeleton } from '../ui/skeleton'
 import type { AppInfo } from '../../types'
 import { cn } from '../../lib/utils'
-import { Plus, RefreshCw, Search, TriangleAlert, ChevronRight } from 'lucide-react'
+import { Plus, ChevronRight } from 'lucide-react'
 import { AppDeleteButton } from './AppDeleteButton'
 import { getAppIcon } from '../../utils/getAppIcon'
+import { SearchInput, ErrorState } from '../shared'
 
 interface AppListProps {
   apps?: AppInfo[]
@@ -37,23 +37,7 @@ export function AppList({ apps, isLoading, isError, onRetry, selectedAppId, onSe
 
       {/* Search Row */}
       <div className="flex items-center gap-2">
-        <div className="relative flex-1">
-          <Search 
-            className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" 
-            style={{ color: isDarkMode ? 'rgb(154,164,178)' : 'rgb(107,114,128)' }}
-          />
-          <Input
-            placeholder="Search..."
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            className="h-10 rounded-lg pl-9 text-sm tracking-tight"
-            style={{
-              border: isDarkMode ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.1)',
-              background: isDarkMode ? 'rgb(15,20,27)' : 'rgb(255,255,255)',
-              color: isDarkMode ? '#ffffff' : '#000000'
-            }}
-          />
-        </div>
+        <SearchInput value={query} onChange={setQuery} isDarkMode={isDarkMode} />
         <Button
           onClick={onCreateApp}
           size="icon"
@@ -77,16 +61,11 @@ export function AppList({ apps, isLoading, isError, onRetry, selectedAppId, onSe
       )}
 
       {isError && (
-        <div className="flex flex-col items-start gap-3 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-4 text-sm text-red-100">
-          <div className="flex items-center gap-2 font-semibold">
-            <TriangleAlert size={16} />
-            Mock API failed
-          </div>
-          <p className="text-xs text-red-200/80">Toggle the lightning icon in the top bar to simulate recovery.</p>
-          <Button variant="outline" size="sm" onClick={onRetry} className="gap-2 text-red-100">
-            <RefreshCw size={14} /> Retry
-          </Button>
-        </div>
+        <ErrorState
+          title="Mock API failed"
+          message="Toggle the lightning icon in the top bar to simulate recovery."
+          onRetry={onRetry}
+        />
       )}
 
       {!isLoading && !isError && (
