@@ -36,6 +36,10 @@ interface GetServiceLogoProps {
     size?: 'small' | 'medium' | 'large'
 }
 
+/**
+ * Returns the appropriate branded logo icon for a service/database.
+ * Falls back to generic icons based on service kind.
+ */
 export function getServiceLogo({ serviceName, kind, size = 'medium' }: GetServiceLogoProps) {
     const name = serviceName.toLowerCase()
     
@@ -47,7 +51,6 @@ export function getServiceLogo({ serviceName, kind, size = 'medium' }: GetServic
     
     const iconSize = sizeClasses[size]
     
-    // Database services with branded logos
     if (name.includes('postgres') || name === 'postgresql') {
         return <BiLogoPostgresql className={`${iconSize} text-[#336791]`} />
     }
@@ -90,7 +93,6 @@ export function getServiceLogo({ serviceName, kind, size = 'medium' }: GetServic
         return <SiFirebase className={`${iconSize} text-[#FFCA28]`} />
     }
     
-    // Use branded Simple Icons logos
     if (name.includes('cloudflare')) {
         return <SiCloudflare className={`${iconSize} text-orange-500`} />
     }
@@ -119,7 +121,6 @@ export function getServiceLogo({ serviceName, kind, size = 'medium' }: GetServic
         return <SiKubernetes className={`${iconSize} text-blue-500`} />
     }
     
-    // AWS/Azure/GCP services
     if (name.includes('aws') || name.includes('s3') || name.includes('ec2') || name.includes('lambda')) {
         return <FaAws className={`${iconSize} text-orange-400`} />
     }
@@ -130,7 +131,6 @@ export function getServiceLogo({ serviceName, kind, size = 'medium' }: GetServic
         return <SiGooglecloud className={`${iconSize} text-blue-400`} />
     }
     
-    // Use React Icons for specific service types
     if (name.includes('edge')) {
         return <FaNetworkWired className={`${iconSize} text-purple-500`} />
     }
@@ -153,7 +153,6 @@ export function getServiceLogo({ serviceName, kind, size = 'medium' }: GetServic
         return <MdCloudQueue className={`${iconSize} text-orange-500`} />
     }
     
-    // Default fallback based on service kind
     if (kind === 'database') {
         return <FaDatabase className={`${size === 'small' ? 'h-5 w-5' : iconSize} text-blue-400`} />
     }

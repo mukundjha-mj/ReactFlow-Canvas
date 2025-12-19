@@ -18,7 +18,12 @@ import { TopActions } from './components/layout/TopActions'
 import { AppDropdown } from './components/layout/AppDropdown'
 import { ServiceIconRail } from './components/layout/ServiceIconRail'
 import { CreateAppDialog } from './components/layout/CreateAppDialog'
+import { KeyboardShortcuts } from './components/layout/KeyboardShortcuts'
 
+/**
+ * Main application component managing the ReactFlow canvas with service/database nodes.
+ * Handles app selection, node management, keyboard shortcuts, and theme state.
+ */
 function App() {
   const queryClient = useQueryClient()
   const selectedAppId = useUIStore((s) => s.selectedAppId)
@@ -48,7 +53,6 @@ function App() {
 
   useEffect(() => {
     if (graphQuery.data) {
-      // Add isDarkMode to each node's data
       const nodesWithTheme = graphQuery.data.nodes.map(node => ({
         ...node,
         data: { ...node.data, isDarkMode }
@@ -61,7 +65,7 @@ function App() {
 
   const onConnect = useCallback(
     () => {
-      // Connection disabled
+      // Connections between nodes are intentionally disabled in this demo
     },
     [],
   )
@@ -71,17 +75,30 @@ function App() {
     [nodes, selectedNodeId],
   )
 
+  /**
+   * Updates the selected node's data while preserving theme consistency.
+   * Uses immutable update pattern to ensure React state updates properly.
+   */
   const updateSelectedNode = useCallback(
     (data: Partial<ServiceNodeData>) => {
+      if (!selectedNodeId) return
+      
       setNodes((nds) =>
-        nds.map((node) =>
-          node.id === selectedNodeId
-            ? { ...node, data: { ...node.data, ...data, isDarkMode } }
-            : node,
-        ),
+        nds.map((node) => {
+          if (node.id !== selectedNodeId) return node
+          
+          return {
+            ...node,
+            data: {
+              ...node.data,
+              ...data,
+              isDarkMode,
+            },
+          }
+        }),
       )
     },
-    [selectedNodeId, isDarkMode],
+    [selectedNodeId, isDarkMode, setNodes],
   )
 
   const handleDeleteSelected = useCallback(() => {
@@ -94,20 +111,43 @@ function App() {
     toggleMobilePanel(false)
   }, [selectedNodeId, setSelectedNodeId, toggleMobilePanel])
 
+  /**
+   * Global keyboard shortcuts handler.
+   * Shortcuts: Delete/Backspace (delete node), F (fit view), P (toggle panel), Escape (close/deselect)
+   */
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      // Don't delete node if user is typing in an input/textarea
       const target = event.target as HTMLElement
       const isInputField = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA'
       
       if ((event.key === 'Delete' || event.key === 'Backspace') && selectedNodeId && !isInputField) {
         event.preventDefault()
         handleDeleteSelected()
+        return
+      }
+      
+      if (event.key === 'f' && !isInputField && !event.ctrlKey && !event.metaKey) {
+        event.preventDefault()
+        if (instance) {
+          instance.fitView({ duration: 300, padding: 0.2 })
+        }
+        return
+      }
+      
+      if ((event.key === 'p' || event.key === 'Escape') && !isInputField && !event.ctrlKey && !event.metaKey) {
+        event.preventDefault()
+        if (event.key === 'Escape' && (isMobilePanelOpen || selectedNodeId)) {
+          setSelectedNodeId(null)
+          toggleMobilePanel(false)
+        } else if (event.key === 'p') {
+          toggleMobilePanel()
+        }
+        return
       }
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [handleDeleteSelected, selectedNodeId])
+  }, [handleDeleteSelected, selectedNodeId, instance, isMobilePanelOpen, setSelectedNodeId, toggleMobilePanel])
 
   const isGraphLoading = graphQuery.isFetching && !graphQuery.data
 
@@ -148,6 +188,19 @@ function App() {
           onCreateApp={() => {
             setIsCreateAppDialogOpen(true)
           }}
+          onDeleteApp={(id) => {
+            queryClient.setQueryData<AppInfo[]>(['apps', shouldFail], (oldApps) => {
+              if (!oldApps) return []
+              return oldApps.filter((a) => a.id !== id)
+            })
+            queryClient.removeQueries({ queryKey: ['graph', id, shouldFail] })
+            
+            if (selectedAppId === id) {
+              const remaining = (appsQuery.data || []).filter((a) => a.id !== id)
+              setSelectedAppId(remaining[0]?.id || null)
+              setSelectedNodeId(null)
+            }
+          }}
           onRetry={() => appsQuery.refetch()}
           isDarkMode={isDarkMode}
         />
@@ -160,19 +213,24 @@ function App() {
           isDarkMode={isDarkMode}
           onAddNode={() => {
             const newNodeId = `node-${Date.now()}`
-            const serviceNames = ['Redis', 'Postgres', 'MongoDB', 'MySQL', 'Elasticsearch']
-            const randomService = serviceNames[Math.floor(Math.random() * serviceNames.length)]
+            
+            const services = ['API Gateway', 'Load Balancer', 'Auth Service', 'Payment Service', 'Notification Service']
+            const databases = ['Redis', 'Postgres', 'MongoDB', 'MySQL', 'Elasticsearch']
+            
+            const isDatabase = Math.random() > 0.5
+            const nodeKind: 'database' | 'service' = isDatabase ? 'database' : 'service'
+            const names = isDatabase ? databases : services
+            const randomName = names[Math.floor(Math.random() * names.length)]
+            
             const providers = ['aws', 'gcp', 'azure']
             const randomProvider = providers[Math.floor(Math.random() * providers.length)]
             
-            // Calculate position (center of viewport or below existing nodes)
             const viewport = instance?.getViewport() || { x: 0, y: 0, zoom: 1 }
             const existingNodes = nodes
-            let newX = 520 // Default center
+            let newX = 520
             let newY = 200
             
             if (existingNodes.length > 0) {
-              // Find the lowest node and place new node below it
               const maxY = Math.max(...existingNodes.map(n => n.position.y))
               newY = maxY + 200
             }
@@ -182,10 +240,10 @@ function App() {
               type: 'service',
               position: { x: newX, y: newY },
               data: {
-                name: randomService,
-                kind: 'database',
+                name: randomName,
+                kind: nodeKind,
                 status: 'healthy',
-                description: 'New service node',
+                description: isDatabase ? 'Database instance' : 'Service instance',
                 costPerHour: Math.random() * 0.1,
                 metrics: {
                   cpu: Math.random() * 4,
@@ -202,14 +260,12 @@ function App() {
             setNodes((nds) => [...nds, newNode])
             setSelectedNodeId(newNodeId)
             
-            // Fit view to show the new node
             setTimeout(() => {
               instance?.fitView({ duration: 300, padding: 0.2 })
             }, 100)
           }}
         />
 
-        {/* Center Canvas */}
         <div className="relative flex-1 overflow-hidden bg-transparent">
           <FlowCanvas
             nodes={nodes}
@@ -219,11 +275,9 @@ function App() {
             onConnect={onConnect}
             onSelectNode={(id) => {
               setSelectedNodeId(id)
-              // No need to toggle mobile panel, drawer will auto-open based on selectedNodeId
             }}
             onInit={(inst) => {
               setInstance(inst)
-              // Fit view on initial load with a slight delay to ensure nodes are rendered
               setTimeout(() => {
                 inst.fitView({ duration: 400, padding: 0.2 })
               }, 100)
@@ -257,6 +311,7 @@ function App() {
           className="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm transition-opacity duration-300 lg:bg-black/10"
           onClick={() => {
             setSelectedNodeId(null)
+            toggleMobilePanel(false)
           }}
         />
       )}
@@ -305,6 +360,19 @@ function App() {
                 setSelectedNodeId(null)
                 toggleMobilePanel(false)
               }}
+              onDeleteApp={(id) => {
+                queryClient.setQueryData<AppInfo[]>(['apps', shouldFail], (oldApps) => {
+                  if (!oldApps) return []
+                  return oldApps.filter((a) => a.id !== id)
+                })
+                queryClient.removeQueries({ queryKey: ['graph', id, shouldFail] })
+                
+                if (selectedAppId === id) {
+                  const remaining = (appsQuery.data || []).filter((a) => a.id !== id)
+                  setSelectedAppId(remaining[0]?.id || null)
+                  setSelectedNodeId(null)
+                }
+              }}
               isDarkMode={isDarkMode}
             />
           )}
@@ -324,18 +392,15 @@ function App() {
             accent: '#3b82f6'
           }
           
-          // Add the new app to the query cache
           queryClient.setQueryData<AppInfo[]>(['apps', shouldFail], (oldApps) => {
             return oldApps ? [...oldApps, newApp] : [newApp]
           })
           
-          // Create empty graph for the new app
           queryClient.setQueryData<GraphResponse>(['graph', newAppId, shouldFail], {
             nodes: [],
             edges: []
           })
           
-          // Select the newly created app
           setSelectedAppId(newAppId)
           setIsAppListOpen(false)
           
@@ -343,6 +408,9 @@ function App() {
         }}
         isDarkMode={isDarkMode}
       />
+
+      {/* Keyboard Shortcuts Help */}
+      <KeyboardShortcuts isDarkMode={isDarkMode} />
     </div>
   )
 }

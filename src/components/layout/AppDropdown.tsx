@@ -13,21 +13,23 @@ interface AppDropdownProps {
   onToggle: () => void
   onSelect: (id: string) => void
   onCreateApp: () => void
+  onDeleteApp?: (id: string) => void
   onRetry: () => void
   isDarkMode: boolean
 }
 
-export function AppDropdown({ 
-  apps, 
-  selectedAppId, 
-  isLoading, 
-  isError, 
-  isOpen, 
-  onToggle, 
-  onSelect, 
+export function AppDropdown({
+  apps,
+  selectedAppId,
+  isLoading,
+  isError,
+  isOpen,
+  onToggle,
+  onSelect,
   onCreateApp,
+  onDeleteApp = () => {},
   onRetry,
-  isDarkMode 
+  isDarkMode
 }: AppDropdownProps) {
   const selectedApp = apps?.find(app => app.id === selectedAppId)
   
@@ -97,6 +99,7 @@ export function AppDropdown({
             selectedAppId={selectedAppId}
             onSelect={onSelect}
             onCreateApp={onCreateApp}
+            onDeleteApp={onDeleteApp}
             isDarkMode={isDarkMode}
           />
         </div>

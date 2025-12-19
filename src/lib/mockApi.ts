@@ -1,27 +1,27 @@
 import type { AppInfo, GraphResponse, ServiceStatus } from '../types'
 
-// Auto-arrange nodes based on count
+/**
+ * Arranges nodes in visually pleasing patterns based on count.
+ * Supports layouts: single, side-by-side, T-shape, pyramid, and grid.
+ */
 function autoArrangeNodes(nodes: any[]) {
   const count = nodes.length
   const centerX = 520
   const topY = 50
   const bottomY = 320
-  const spacing = 320 // horizontal spacing between nodes
+  const spacing = 320
 
   return nodes.map((node, index) => {
     let x = centerX
     let y = topY
 
     if (count === 1) {
-      // Single node - center
       x = centerX
-      y = topY + 135 // vertically centered
+      y = topY + 135
     } else if (count === 2) {
-      // 2 nodes - side by side
       x = centerX + (index === 0 ? -spacing / 2 : spacing / 2)
       y = topY + 135
     } else if (count === 3) {
-      // 3 nodes - T shape (1 top, 2 bottom)
       if (index === 0) {
         x = centerX
         y = topY
@@ -30,7 +30,6 @@ function autoArrangeNodes(nodes: any[]) {
         y = bottomY
       }
     } else if (count === 4) {
-      // 4 nodes - pyramid (1 top, 3 bottom)
       if (index === 0) {
         x = centerX
         y = topY
@@ -40,7 +39,6 @@ function autoArrangeNodes(nodes: any[]) {
         y = bottomY
       }
     } else if (count === 5) {
-      // 5 nodes - 2 top, 3 bottom
       if (index < 2) {
         x = centerX + (index === 0 ? -spacing / 2 : spacing / 2)
         y = topY
@@ -50,7 +48,6 @@ function autoArrangeNodes(nodes: any[]) {
         y = bottomY
       }
     } else {
-      // 6+ nodes - grid layout (3 per row)
       const col = index % 3
       const row = Math.floor(index / 3)
       x = centerX + (col - 1) * spacing
@@ -76,123 +73,140 @@ const graphs: Record<string, GraphResponse> = {
   'supertokens-golang': {
     nodes: [
       {
-        id: 'postgres',
+        id: 'api-gateway',
         type: 'service',
         position: { x: 520, y: 50 },
         data: {
-          name: 'Postgres',
+          name: 'API Gateway',
           status: 'healthy',
-          costPerHour: 0.03,
-          metrics: { cpu: 0.02, memory: 0.05, disk: 10, region: 'us-east-1' },
-          scale: 22,
-          description: 'Primary relational store',
-          kind: 'database',
+          costPerHour: 0.05,
+          metrics: { cpu: 1.2, memory: 2.5, disk: 20, region: 'us-east-1' },
+          scale: 45,
+          description: 'Main API gateway service',
+          kind: 'service',
           accent: '#38bdf8',
         },
       },
       {
-        id: 'redis',
+        id: 'auth-service',
         type: 'service',
-        position: { x: 280, y: 320 },
+        position: { x: 200, y: 320 },
         data: {
-          name: 'Redis',
-          status: 'degraded',
-          costPerHour: 0.03,
-          metrics: { cpu: 0.02, memory: 0.05, disk: 10, region: 'us-east-1' },
-          scale: 18,
-          description: 'Caching layer',
+          name: 'Auth Service',
+          status: 'healthy',
+          costPerHour: 0.04,
+          metrics: { cpu: 0.8, memory: 1.8, disk: 15, region: 'us-east-1' },
+          scale: 35,
+          description: 'Authentication service',
           kind: 'service',
           accent: '#f43f5e',
         },
       },
       {
-        id: 'mongodb',
+        id: 'postgres',
         type: 'service',
-        position: { x: 760, y: 320 },
+        position: { x: 520, y: 320 },
         data: {
-          name: 'Mongodb',
-          status: 'down',
+          name: 'Postgres',
+          status: 'healthy',
           costPerHour: 0.03,
-          metrics: { cpu: 0.02, memory: 0.05, disk: 10, region: 'us-east-1' },
-          scale: 30,
-          description: 'Document store',
+          metrics: { cpu: 0.5, memory: 4.0, disk: 100, region: 'us-east-1' },
+          scale: 22,
+          description: 'Primary relational database',
           kind: 'database',
           accent: '#22c55e',
         },
       },
+      {
+        id: 'redis',
+        type: 'service',
+        position: { x: 840, y: 320 },
+        data: {
+          name: 'Redis',
+          status: 'healthy',
+          costPerHour: 0.02,
+          metrics: { cpu: 0.3, memory: 2.0, disk: 10, region: 'us-east-1' },
+          scale: 18,
+          description: 'In-memory cache database',
+          kind: 'database',
+          accent: '#f43f5e',
+        },
+      },
     ],
     edges: [
-      { id: 'edge-postgres-redis', source: 'postgres', target: 'redis', animated: false, type: 'smoothstep' },
-      { id: 'edge-postgres-mongodb', source: 'postgres', target: 'mongodb', animated: false, type: 'smoothstep' },
+      { id: 'edge-gateway-auth', source: 'api-gateway', target: 'auth-service', animated: false, type: 'smoothstep' },
+      { id: 'edge-gateway-postgres', source: 'api-gateway', target: 'postgres', animated: false, type: 'smoothstep' },
+      { id: 'edge-gateway-redis', source: 'api-gateway', target: 'redis', animated: false, type: 'smoothstep' },
+      { id: 'edge-auth-postgres', source: 'auth-service', target: 'postgres', animated: false, type: 'smoothstep' },
     ],
   },
   'cloud-infrastructure': {
     nodes: [
       {
-        id: 'nginx',
+        id: 'load-balancer',
         type: 'service',
         position: { x: 520, y: 50 },
         data: {
-          name: 'Nginx',
+          name: 'Load Balancer',
           status: 'healthy',
-          costPerHour: 0.02,
-          metrics: { cpu: 0.01, memory: 0.03, disk: 5, region: 'us-east-2' },
-          scale: 15,
-          description: 'Load balancer',
+          costPerHour: 0.06,
+          metrics: { cpu: 1.5, memory: 3.2, disk: 25, region: 'us-west-2' },
+          scale: 60,
+          description: 'Traffic load balancer',
           kind: 'service',
           accent: '#10b981',
         },
       },
       {
-        id: 'docker',
+        id: 'app-service',
         type: 'service',
         position: { x: 200, y: 320 },
         data: {
-          name: 'Docker',
+          name: 'App Service',
           status: 'healthy',
           costPerHour: 0.04,
-          metrics: { cpu: 0.03, memory: 0.06, disk: 25, region: 'us-east-2' },
+          metrics: { cpu: 0.9, memory: 2.0, disk: 30, region: 'us-west-2' },
           scale: 35,
-          description: 'Container runtime',
+          description: 'Application service',
           kind: 'service',
           accent: '#3b82f6',
         },
       },
       {
-        id: 'kubernetes',
+        id: 'mysql',
         type: 'service',
         position: { x: 520, y: 320 },
         data: {
-          name: 'Kubernetes',
+          name: 'MySQL',
           status: 'healthy',
-          costPerHour: 0.08,
-          metrics: { cpu: 0.05, memory: 0.12, disk: 50, region: 'us-east-2' },
-          scale: 55,
-          description: 'Container orchestration',
-          kind: 'service',
+          costPerHour: 0.03,
+          metrics: { cpu: 0.6, memory: 3.5, disk: 80, region: 'us-west-2' },
+          scale: 28,
+          description: 'MySQL database',
+          kind: 'database',
           accent: '#3b82f6',
         },
       },
       {
-        id: 'azure',
+        id: 'elasticsearch',
         type: 'service',
         position: { x: 840, y: 320 },
         data: {
-          name: 'Azure',
-          status: 'healthy',
-          costPerHour: 0.12,
-          metrics: { cpu: 0.08, memory: 0.18, disk: 100, region: 'eu-west-1' },
-          scale: 72,
-          description: 'Cloud platform',
-          kind: 'service',
+          name: 'Elasticsearch',
+          status: 'degraded',
+          costPerHour: 0.07,
+          metrics: { cpu: 1.2, memory: 5.5, disk: 120, region: 'us-west-2' },
+          scale: 42,
+          description: 'Search and analytics database',
+          kind: 'database',
           accent: '#0078d4',
         },
       },
     ],
     edges: [
-      { id: 'edge-nginx-docker', source: 'nginx', target: 'docker', type: 'smoothstep' },
-      { id: 'edge-nginx-kubernetes', source: 'nginx', target: 'kubernetes', type: 'smoothstep' },
-      { id: 'edge-nginx-azure', source: 'nginx', target: 'azure', type: 'smoothstep' },
+      { id: 'edge-lb-app', source: 'load-balancer', target: 'app-service', type: 'smoothstep' },
+      { id: 'edge-app-mysql', source: 'app-service', target: 'mysql', type: 'smoothstep' },
+      { id: 'edge-app-elastic', source: 'app-service', target: 'elasticsearch', type: 'smoothstep' },
     ],
   },
   'microservices-stack': {
@@ -604,7 +618,6 @@ export const fetchApps = (shouldFail: boolean) => withLatency(apps, shouldFail)
 
 export const fetchGraph = (appId: string, shouldFail: boolean) => {
   const graph = graphs[appId] ?? graphs['supertokens-golang']
-  // Auto-arrange nodes dynamically
   const arrangedGraph = {
     ...graph,
     nodes: autoArrangeNodes(graph.nodes)

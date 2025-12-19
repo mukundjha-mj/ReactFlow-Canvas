@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState, useCallback, useEffect } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs'
 import { Badge } from '../ui/badge'
 import { Input } from '../ui/input'
@@ -17,6 +17,10 @@ interface NodeInspectorProps {
   isDarkMode?: boolean
 }
 
+/**
+ * Right panel inspector for viewing and editing selected node properties.
+ * Implements debounced text inputs (300ms) for optimal performance.
+ */
 const statusTheme = {
   healthy: { label: 'Healthy', variant: 'default' as const, classes: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' },
   degraded: { label: 'Degraded', variant: 'secondary' as const, classes: 'bg-amber-500/20 text-amber-300 border-amber-500/30' },
@@ -29,7 +33,35 @@ export function NodeInspector({ node, onUpdate, isDarkMode = true }: NodeInspect
 
   const status = node ? statusTheme[node.data.status] : undefined
 
-  const sliderValue = useMemo(() => [node?.data.scale ?? 0], [node?.data.scale])
+  const [localName, setLocalName] = useState(node?.data.name ?? '')
+  const [localDescription, setLocalDescription] = useState(node?.data.description ?? '')
+  const [localScale, setLocalScale] = useState(node?.data.scale ?? 0)
+
+  useEffect(() => {
+    if (node) {
+      setLocalName(node.data.name)
+      setLocalDescription(node.data.description ?? '')
+      setLocalScale(node.data.scale)
+    }
+  }, [node?.id])
+
+  useEffect(() => {
+    if (!node || localName === node.data.name) return
+    const timer = setTimeout(() => {
+      onUpdate({ name: localName })
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [localName, node, onUpdate])
+
+  useEffect(() => {
+    if (!node || localDescription === (node.data.description ?? '')) return
+    const timer = setTimeout(() => {
+      onUpdate({ description: localDescription })
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [localDescription, node, onUpdate])
+
+  const sliderValue = useMemo(() => [localScale], [localScale])
 
   if (!node) {
     return (
@@ -75,7 +107,7 @@ export function NodeInspector({ node, onUpdate, isDarkMode = true }: NodeInspect
             >
               {getServiceLogo({ serviceName: node.data.name, kind: node.data.kind, size: 'small' })}
             </div>
-            <h3 className="text-sm font-semibold" style={{ color: isDarkMode ? '#ffffff' : '#000000' }}>{node.data.name}</h3>
+            <h3 className="text-sm font-semibold" style={{ color: isDarkMode ? '#ffffff' : '#000000' }}>{localName}</h3>
           </div>
           <div className="flex items-center gap-2">
             <div
@@ -156,7 +188,7 @@ export function NodeInspector({ node, onUpdate, isDarkMode = true }: NodeInspect
             <div
               className="absolute top-1/2 h-3 w-3 -translate-y-1/2 rounded-full shadow-lg transition-all"
               style={{
-                left: `${Math.min(Math.max(node.data.scale, 0), 100)}%`,
+                left: `${Math.min(Math.max(localScale, 0), 100)}%`,
                 border: `2px solid ${isDarkMode ? '#ffffff' : '#000000'}`,
                 background: isDarkMode ? '#ffffff' : '#000000',
                 boxShadow: isDarkMode
@@ -166,7 +198,7 @@ export function NodeInspector({ node, onUpdate, isDarkMode = true }: NodeInspect
             />
           </div>
           <span className="text-sm font-bold tabular-nums" style={{ color: isDarkMode ? '#ffffff' : '#000000' }}>
-            {node.data.scale.toFixed(0)}
+            {localScale.toFixed(0)}
           </span>
         </div>
 
@@ -223,7 +255,7 @@ export function NodeInspector({ node, onUpdate, isDarkMode = true }: NodeInspect
               className="text-lg font-semibold"
               style={{ color: isDarkMode ? '#ffffff' : '#000000' }}
             >
-              {node.data.name}
+              {localName}
             </p>
             <p
               className="text-xs"
@@ -289,8 +321,9 @@ export function NodeInspector({ node, onUpdate, isDarkMode = true }: NodeInspect
                 Name
               </label>
               <Input
-                value={node.data.name}
-                onChange={(e) => onUpdate({ name: e.target.value })}
+                value={localName}
+                onChange={(e) => setLocalName(e.target.value)}
+                placeholder="Enter node name"
                 style={{
                   border: isDarkMode ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.2)',
                   background: isDarkMode ? 'rgb(38,38,38)' : 'rgb(249,250,251)',
@@ -355,9 +388,10 @@ export function NodeInspector({ node, onUpdate, isDarkMode = true }: NodeInspect
                 Description
               </label>
               <Textarea
-                value={node.data.description ?? ''}
-                onChange={(e) => onUpdate({ description: e.target.value })}
+                value={localDescription}
+                onChange={(e) => setLocalDescription(e.target.value)}
                 placeholder="Short note about this node"
+                rows={3}
                 style={{
                   border: isDarkMode ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.2)',
                   background: isDarkMode ? 'rgb(38,38,38)' : 'rgb(249,250,251)',
@@ -368,25 +402,37 @@ export function NodeInspector({ node, onUpdate, isDarkMode = true }: NodeInspect
             <div className="space-y-3">
               <div className="flex items-center justify-between text-sm font-medium">
                 <span style={{ color: isDarkMode ? '#ffffff' : '#000000' }}>Scale</span>
-                <span style={{ color: isDarkMode ? 'rgb(59,130,246)' : 'rgb(37,99,235)' }}>{node.data.scale}%</span>
+                <span style={{ color: isDarkMode ? 'rgb(59,130,246)' : 'rgb(37,99,235)' }}>{localScale}%</span>
               </div>
               <Slider
                 value={sliderValue}
                 min={0}
                 max={100}
                 step={1}
-                onValueChange={([val]) => onUpdate({ scale: Math.min(Math.max(val, 0), 100) })}
+                onValueChange={([val]) => {
+                  const clamped = Math.min(Math.max(val, 0), 100)
+                  setLocalScale(clamped)
+                  onUpdate({ scale: clamped })
+                }}
                 className="[&_[role=slider]]:border-primary [&_[role=slider]]:bg-background"
               />
               <Input
                 type="number"
                 min={0}
                 max={100}
-                value={node.data.scale}
+                value={localScale}
                 onChange={(e) => {
                   const next = Number(e.target.value)
                   const clamped = Number.isNaN(next) ? 0 : Math.min(Math.max(next, 0), 100)
+                  setLocalScale(clamped)
                   onUpdate({ scale: clamped })
+                }}
+                onBlur={() => {
+                  const clamped = Math.min(Math.max(localScale, 0), 100)
+                  if (localScale !== clamped) {
+                    setLocalScale(clamped)
+                    onUpdate({ scale: clamped })
+                  }
                 }}
                 style={{
                   border: isDarkMode ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.2)',
