@@ -198,34 +198,78 @@ src/
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js 18+ or 20+
-- npm 9+ or yarn/pnpm
+- **Node.js** 18+ or 20+ (LTS recommended)
+- **npm** 9+ or **yarn** 1.22+ or **pnpm** 8+
+- A modern web browser (Chrome, Firefox, Safari, Edge)
+- Git for version control
 
-### Installation
+### Setup Instructions
 
+#### 1. Clone the Repository
 ```bash
-# Clone the repository
 git clone <repository-url>
 cd ReactFlow-Canvas
+```
 
-# Install dependencies
+#### 2. Install Dependencies
+```bash
 npm install
+```
 
-# Start development server
+This will install all required packages including:
+- React 19.2 and ReactFlow 12.3
+- TypeScript 5.9 and Vite 7.2
+- Zustand, TanStack Query, Tailwind CSS
+- shadcn/ui components and icon libraries
+
+#### 3. Start Development Server
+```bash
 npm run dev
 ```
 
 The application will be available at `http://localhost:5173`
 
+Vite will provide:
+- ⚡ Lightning-fast Hot Module Replacement (HMR)
+- 🔄 Instant updates without full page reload
+- 📊 Built-in dev server with proxy support
+
+#### 4. Build for Production
+```bash
+npm run build
+```
+
+This will:
+1. Run TypeScript type checking
+2. Create optimized production build in `dist/`
+3. Minify and bundle all assets
+
+#### 5. Preview Production Build
+```bash
+npm run preview
+```
+
+Test the production build locally before deployment.
+
 ### Available Scripts
 
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start Vite dev server with HMR |
-| `npm run build` | Type-check and build for production |
-| `npm run preview` | Preview production build locally |
-| `npm run lint` | Run ESLint on all source files |
-| `npm run typecheck` | Run TypeScript type checking |
+| Command | Description | When to Use |
+|---------|-------------|-------------|
+| `npm run dev` | Start Vite dev server with HMR | Development |
+| `npm run build` | Type-check and build for production | Before deployment |
+| `npm run preview` | Preview production build locally | Testing production build |
+| `npm run lint` | Run ESLint on all source files | Code quality checks |
+| `npm run typecheck` | Run TypeScript type checking | Type validation |
+
+### Environment Setup
+
+No environment variables are required for basic setup. The application uses mock data by default.
+
+For custom configuration, you can create a `.env` file:
+```env
+VITE_API_BASE_URL=http://localhost:3000  # Optional: Real API endpoint
+VITE_ENABLE_DEV_TOOLS=true               # Optional: Enable React Query DevTools
+```
 
 ## 📖 Usage Guide
 
@@ -294,11 +338,104 @@ function autoArrangeNodes(nodes: any[]) {
 - **ESLint** - Enforces React best practices and hooks rules
 - **Prettier** - Code formatting (integrated with ESLint)
 
-### Architecture Decisions
-- **Debouncing** - 300ms delay for text inputs prevents excessive re-renders
-- **Immutable Updates** - React state uses immutable patterns for predictability
-- **Query Invalidation** - Ensures UI consistency when data changes
-- **Keyboard Events** - Input field detection prevents shortcut conflicts
+### Key Architecture Decisions
+
+#### 1. **State Management Strategy**
+- **Zustand for UI State**: Lightweight (< 1KB) and simple API for global UI state
+- **TanStack Query for Server State**: Automatic caching, background refetching, and error handling
+- **React State for Local State**: Component-specific state like form inputs
+
+**Why?** Separation of concerns - UI state, server state, and local state each have different lifecycles and requirements.
+
+#### 2. **Debounced Input Updates (300ms)**
+- Text inputs (name, description) use local state with debounced updates
+- Slider updates happen immediately without debouncing
+- Prevents excessive re-renders and API calls
+
+**Why?** Balances UX responsiveness with performance. Users see instant feedback while reducing unnecessary updates.
+
+#### 3. **Custom ReactFlow Nodes**
+- ServiceNode component with conditional styling based on node type
+- Purple theme for databases, blue theme for services
+- Inline styles for dynamic theming (dark/light mode)
+
+**Why?** ReactFlow requires custom node components for advanced styling. Inline styles allow theme switching without CSS conflicts.
+
+#### 4. **Mock API with Simulated Latency**
+- 800-1200ms artificial delay to simulate real network conditions
+- Optional error simulation toggle for testing error states
+- Pre-configured demo data for 5 applications
+
+**Why?** Tests loading states, error handling, and cache behavior without backend dependency.
+
+#### 5. **Keyboard Shortcuts with Input Detection**
+- Global keyboard listeners check if user is typing in input/textarea
+- Prevents shortcuts from triggering during text entry
+- Escape key closes panel OR deselects node (context-aware)
+
+**Why?** Improves accessibility and power user experience without interfering with normal typing.
+
+#### 6. **Immutable State Updates**
+- All state updates use spread operators and avoid mutations
+- ReactFlow nodes are cloned before modification
+- Ensures React's reconciliation works correctly
+
+**Why?** React depends on referential equality checks for performance. Mutations break change detection.
+
+#### 7. **Component Composition over Prop Drilling**
+- Small, focused components with single responsibility
+- Zustand hooks used directly in components instead of prop drilling
+- shadcn/ui components composed with Radix UI primitives
+
+**Why?** Improves maintainability, testability, and reduces unnecessary re-renders from prop changes.
+
+### Known Limitations
+
+#### Performance
+- **Large Graphs**: No virtualization - performance may degrade with 100+ nodes
+- **Edge Rendering**: Connections between nodes are disabled (UI limitation)
+- **Mobile Performance**: Complex graphs may struggle on older mobile devices
+
+#### Features
+- **No Undo/Redo**: State history not implemented
+- **No Persistence**: Changes are lost on page refresh (mock data only)
+- **No Real-time Collaboration**: Single-user experience
+- **No Node Connections**: Edge creation is disabled in the current implementation
+- **No Export/Import**: Cannot save or load graph configurations
+
+#### Browser Support
+- **Modern Browsers Only**: Requires ES2020+ support
+- **No IE11 Support**: Uses modern JavaScript features
+- **Touch Gestures**: Limited multi-touch support on mobile
+
+#### Data Handling
+- **Mock Data Only**: No backend integration
+- **5 App Limit**: Pre-configured demo apps (can be extended)
+- **No Authentication**: No user management or authorization
+- **No Data Validation**: Minimal input validation on forms
+
+#### UI/UX
+- **Fixed Layout**: Canvas size adapts to viewport but no custom sizing
+- **Limited Accessibility**: Keyboard shortcuts exist but screen reader support is minimal
+- **No Drag Handles**: Entire node is draggable (no specific drag handle)
+- **Single Selection**: Cannot select multiple nodes at once
+
+#### Development
+- **No Tests**: Unit tests, integration tests, and E2E tests not implemented
+- **No Documentation**: JSDoc comments added but no generated API docs
+- **No CI/CD**: No automated build/deploy pipeline configured
+- **No Error Boundaries**: Runtime errors may crash the entire app
+
+### Future Improvements
+- Add virtualization for large graphs (react-window or react-virtual)
+- Implement undo/redo with state history
+- Add backend integration with real API
+- Enable node connections with edge validation
+- Add export/import functionality (JSON format)
+- Implement comprehensive test suite
+- Add error boundaries and better error handling
+- Improve accessibility (ARIA labels, focus management)
+- Add multi-node selection and bulk operations
 
 ## 📝 Mock Data
 
