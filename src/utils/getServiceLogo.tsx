@@ -9,7 +9,17 @@ import {
     SiRabbitmq,
     SiDocker,
     SiKubernetes,
-    SiMongodb
+    SiMongodb,
+    SiMysql,
+    SiPrisma,
+    SiMariadb,
+    SiApachecassandra,
+    SiCouchbase,
+    SiInfluxdb,
+    SiNeo4J,
+    SiOracle,
+    SiAmazondynamodb,
+    SiFirebase
 } from 'react-icons/si'
 import { FaDatabase, FaNetworkWired, FaAws } from 'react-icons/fa'
 import { BiData } from 'react-icons/bi'
@@ -37,15 +47,47 @@ export function getServiceLogo({ serviceName, kind, size = 'medium' }: GetServic
     
     const iconSize = sizeClasses[size]
     
-    // Check for specific database services with real logos
-    if (name.includes('postgres')) {
+    // Database services with branded logos
+    if (name.includes('postgres') || name === 'postgresql') {
         return <BiLogoPostgresql className={`${iconSize} text-[#336791]`} />
+    }
+    if (name.includes('mysql')) {
+        return <SiMysql className={`${iconSize} text-[#4479A1]`} />
     }
     if (name.includes('redis')) {
         return <DiRedis className={`${iconSize} text-[#DC382D]`} />
     }
     if (name.includes('mongo')) {
         return <SiMongodb className={`${iconSize} text-[#47A248]`} />
+    }
+    if (name.includes('prisma')) {
+        return <SiPrisma className={`${iconSize} text-[#2D3748]`} />
+    }
+    if (name.includes('mariadb')) {
+        return <SiMariadb className={`${iconSize} text-[#003545]`} />
+    }
+    if (name.includes('cassandra')) {
+        return <SiApachecassandra className={`${iconSize} text-[#1287B1]`} />
+    }
+    if (name.includes('couchbase')) {
+        return <SiCouchbase className={`${iconSize} text-[#EA2328]`} />
+    }
+    if (name.includes('influx')) {
+        return <SiInfluxdb className={`${iconSize} text-[#22ADF6]`} />
+    }
+    if (name.includes('neo4j')) {
+        return <SiNeo4J className={`${iconSize} text-[#008CC1]`} />
+    }
+    if (name.includes('oracle')) {
+        return <SiOracle className={`${iconSize} text-[#F80000]`} />
+    }
+    
+    if (name.includes('dynamodb')) {
+        return <SiAmazondynamodb 
+ className={`${iconSize} text-[#4053D6]`} />
+    }
+    if (name.includes('firebase')) {
+        return <SiFirebase className={`${iconSize} text-[#FFCA28]`} />
     }
     
     // Use branded Simple Icons logos

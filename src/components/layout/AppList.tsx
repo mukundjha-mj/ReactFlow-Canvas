@@ -14,9 +14,11 @@ interface AppListProps {
   onRetry: () => void
   selectedAppId: string | null
   onSelect: (id: string) => void
+  onCreateApp: () => void
+  isDarkMode: boolean
 }
 
-export function AppList({ apps, isLoading, isError, onRetry, selectedAppId, onSelect }: AppListProps) {
+export function AppList({ apps, isLoading, isError, onRetry, selectedAppId, onSelect, onCreateApp, isDarkMode }: AppListProps) {
   const [query, setQuery] = useState('')
 
   const filtered = useMemo(() => {
@@ -28,23 +30,37 @@ export function AppList({ apps, isLoading, isError, onRetry, selectedAppId, onSe
     <div className="flex flex-col gap-4">
       {/* Application Section Title */}
       <div>
-        <h2 className="text-sm font-semibold tracking-tight text-white">Application</h2>
+        <h2 className="text-sm font-semibold tracking-tight" style={{ color: isDarkMode ? '#ffffff' : '#000000' }}>Application</h2>
       </div>
 
       {/* Search Row */}
       <div className="flex items-center gap-2">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[rgb(154,164,178)]" />
+          <Search 
+            className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" 
+            style={{ color: isDarkMode ? 'rgb(154,164,178)' : 'rgb(107,114,128)' }}
+          />
           <Input
             placeholder="Search..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="h-10 rounded-lg border-white/[0.08] bg-[rgb(15,20,27)] pl-9 text-sm tracking-tight text-white placeholder:text-[rgb(154,164,178)] focus:bg-[rgb(15,20,27)]"
+            className="h-10 rounded-lg pl-9 text-sm tracking-tight"
+            style={{
+              border: isDarkMode ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.1)',
+              background: isDarkMode ? 'rgb(15,20,27)' : 'rgb(255,255,255)',
+              color: isDarkMode ? '#ffffff' : '#000000'
+            }}
           />
         </div>
         <Button
+          onClick={onCreateApp}
           size="icon"
-          className="h-10 w-10 shrink-0 rounded-lg bg-primary text-white hover:bg-primary/90"
+          className="h-10 w-10 shrink-0 rounded-lg transition-all hover:scale-105"
+          style={{
+            background: isDarkMode ? 'rgba(59,130,246,0.2)' : 'rgba(59,130,246,0.15)',
+            border: isDarkMode ? '1px solid rgba(59,130,246,0.3)' : '1px solid rgba(59,130,246,0.2)',
+            color: '#3b82f6'
+          }}
         >
           <Plus size={18} />
         </Button>
@@ -77,34 +93,58 @@ export function AppList({ apps, isLoading, isError, onRetry, selectedAppId, onSe
             <button
               key={app.id}
               onClick={() => onSelect(app.id)}
-              className={cn(
-                'group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-all duration-200',
-                selectedAppId === app.id
-                  ? 'bg-primary/15 shadow-[0_0_12px_rgba(59,130,246,0.3)]'
-                  : 'hover:bg-white/[0.04]',
-              )}
+              className="group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-all duration-200"
+              style={{
+                background: selectedAppId === app.id
+                  ? 'rgba(59,130,246,0.15)'
+                  : 'transparent',
+                boxShadow: selectedAppId === app.id
+                  ? '0 0 12px rgba(59,130,246,0.3)'
+                  : 'none'
+              }}
+              onMouseEnter={(e) => {
+                if (selectedAppId !== app.id) {
+                  e.currentTarget.style.background = isDarkMode ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)'
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (selectedAppId !== app.id) {
+                  e.currentTarget.style.background = 'transparent'
+                }
+              }}
             >
               <div
                 className={cn(
                   'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-lg transition-all',
-                  selectedAppId === app.id ? 'bg-primary shadow-md' : 'bg-gradient-to-br from-primary/80 to-primary/60',
                 )}
+                style={{
+                  background: selectedAppId === app.id 
+                    ? (isDarkMode ? 'rgba(59,130,246,0.2)' : 'rgba(59,130,246,0.15)')
+                    : (isDarkMode ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)'),
+                  boxShadow: selectedAppId === app.id 
+                    ? (isDarkMode ? '0 0 0 1px rgba(59,130,246,0.5)' : '0 0 0 1px rgba(59,130,246,0.3)')
+                    : 'none'
+                }}
               >
                 {getAppIcon({ iconName: app.icon, className: "h-4 w-4" })}
               </div>
               <span
-                className={cn(
-                  'flex-1 text-[13px] font-medium tracking-tight transition-colors',
-                  selectedAppId === app.id ? 'text-white' : 'text-[rgb(154,164,178)] group-hover:text-white',
-                )}
+                className="flex-1 text-[13px] font-medium tracking-tight transition-colors"
+                style={{ 
+                  color: selectedAppId === app.id 
+                    ? (isDarkMode ? '#ffffff' : '#000000')
+                    : (isDarkMode ? 'rgb(200,200,200)' : 'rgb(80,80,80)')
+                }}
               >
                 {app.name}
               </span>
               <ChevronRight
-                className={cn(
-                  'h-4 w-4 shrink-0 transition-colors',
-                  selectedAppId === app.id ? 'text-primary' : 'text-[rgb(154,164,178)] group-hover:text-white',
-                )}
+                className="h-4 w-4 shrink-0 transition-colors"
+                style={{ 
+                  color: selectedAppId === app.id 
+                    ? '#3b82f6'
+                    : (isDarkMode ? 'rgb(120,120,120)' : 'rgb(160,160,160)')
+                }}
               />
             </button>
           ))}

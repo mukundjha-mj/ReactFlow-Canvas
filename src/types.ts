@@ -1,4 +1,4 @@
-import type { Edge, Node } from 'reactflow'
+import type { Edge, Node } from '@xyflow/react'
 
 export type ServiceStatus = 'healthy' | 'degraded' | 'down'
 
@@ -20,6 +20,9 @@ export interface ServiceNodeData {
   description?: string
   kind: ServiceKind
   accent?: string
+  isDarkMode?: boolean
+  provider?: string
+  [key: string]: unknown
 }
 
 export type ServiceNode = Node<ServiceNodeData>

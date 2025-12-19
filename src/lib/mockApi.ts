@@ -1,5 +1,69 @@
 import type { AppInfo, GraphResponse, ServiceStatus } from '../types'
 
+// Auto-arrange nodes based on count
+function autoArrangeNodes(nodes: any[]) {
+  const count = nodes.length
+  const centerX = 520
+  const topY = 50
+  const bottomY = 320
+  const spacing = 320 // horizontal spacing between nodes
+
+  return nodes.map((node, index) => {
+    let x = centerX
+    let y = topY
+
+    if (count === 1) {
+      // Single node - center
+      x = centerX
+      y = topY + 135 // vertically centered
+    } else if (count === 2) {
+      // 2 nodes - side by side
+      x = centerX + (index === 0 ? -spacing / 2 : spacing / 2)
+      y = topY + 135
+    } else if (count === 3) {
+      // 3 nodes - T shape (1 top, 2 bottom)
+      if (index === 0) {
+        x = centerX
+        y = topY
+      } else {
+        x = centerX + (index === 1 ? -spacing * 0.75 : spacing * 0.75)
+        y = bottomY
+      }
+    } else if (count === 4) {
+      // 4 nodes - pyramid (1 top, 3 bottom)
+      if (index === 0) {
+        x = centerX
+        y = topY
+      } else {
+        const offset = [-spacing, 0, spacing]
+        x = centerX + offset[index - 1]
+        y = bottomY
+      }
+    } else if (count === 5) {
+      // 5 nodes - 2 top, 3 bottom
+      if (index < 2) {
+        x = centerX + (index === 0 ? -spacing / 2 : spacing / 2)
+        y = topY
+      } else {
+        const offset = [-spacing, 0, spacing]
+        x = centerX + offset[index - 2]
+        y = bottomY
+      }
+    } else {
+      // 6+ nodes - grid layout (3 per row)
+      const col = index % 3
+      const row = Math.floor(index / 3)
+      x = centerX + (col - 1) * spacing
+      y = topY + row * 270
+    }
+
+    return {
+      ...node,
+      position: { x, y }
+    }
+  })
+}
+
 const apps: AppInfo[] = [
   { id: 'supertokens-golang', name: 'supertokens-golang', accent: '#6f6af8', icon: 'go' },
   { id: 'cloud-infrastructure', name: 'Cloud Infrastructure', accent: '#0ea5e9', icon: 'cloud' },
@@ -14,7 +78,7 @@ const graphs: Record<string, GraphResponse> = {
       {
         id: 'postgres',
         type: 'service',
-        position: { x: 520, y: 140 },
+        position: { x: 520, y: 50 },
         data: {
           name: 'Postgres',
           status: 'healthy',
@@ -29,7 +93,7 @@ const graphs: Record<string, GraphResponse> = {
       {
         id: 'redis',
         type: 'service',
-        position: { x: 360, y: 340 },
+        position: { x: 280, y: 320 },
         data: {
           name: 'Redis',
           status: 'degraded',
@@ -44,7 +108,7 @@ const graphs: Record<string, GraphResponse> = {
       {
         id: 'mongodb',
         type: 'service',
-        position: { x: 700, y: 340 },
+        position: { x: 760, y: 320 },
         data: {
           name: 'Mongodb',
           status: 'down',
@@ -67,7 +131,7 @@ const graphs: Record<string, GraphResponse> = {
       {
         id: 'nginx',
         type: 'service',
-        position: { x: 520, y: 100 },
+        position: { x: 520, y: 50 },
         data: {
           name: 'Nginx',
           status: 'healthy',
@@ -82,7 +146,7 @@ const graphs: Record<string, GraphResponse> = {
       {
         id: 'docker',
         type: 'service',
-        position: { x: 300, y: 280 },
+        position: { x: 200, y: 320 },
         data: {
           name: 'Docker',
           status: 'healthy',
@@ -97,7 +161,7 @@ const graphs: Record<string, GraphResponse> = {
       {
         id: 'kubernetes',
         type: 'service',
-        position: { x: 520, y: 280 },
+        position: { x: 520, y: 320 },
         data: {
           name: 'Kubernetes',
           status: 'healthy',
@@ -112,7 +176,7 @@ const graphs: Record<string, GraphResponse> = {
       {
         id: 'azure',
         type: 'service',
-        position: { x: 740, y: 280 },
+        position: { x: 840, y: 320 },
         data: {
           name: 'Azure',
           status: 'healthy',
@@ -136,7 +200,7 @@ const graphs: Record<string, GraphResponse> = {
       {
         id: 'kafka',
         type: 'service',
-        position: { x: 520, y: 120 },
+        position: { x: 520, y: 50 },
         data: {
           name: 'Kafka',
           status: 'healthy',
@@ -151,7 +215,7 @@ const graphs: Record<string, GraphResponse> = {
       {
         id: 'rabbitmq',
         type: 'service',
-        position: { x: 300, y: 300 },
+        position: { x: 280, y: 320 },
         data: {
           name: 'RabbitMQ',
           status: 'healthy',
@@ -166,7 +230,7 @@ const graphs: Record<string, GraphResponse> = {
       {
         id: 'elasticsearch',
         type: 'service',
-        position: { x: 740, y: 300 },
+        position: { x: 760, y: 320 },
         data: {
           name: 'Elasticsearch',
           status: 'degraded',
@@ -189,7 +253,7 @@ const graphs: Record<string, GraphResponse> = {
       {
         id: 'aws',
         type: 'service',
-        position: { x: 520, y: 100 },
+        position: { x: 520, y: 50 },
         data: {
           name: 'AWS S3',
           status: 'healthy',
@@ -204,7 +268,7 @@ const graphs: Record<string, GraphResponse> = {
       {
         id: 'apache',
         type: 'service',
-        position: { x: 300, y: 280 },
+        position: { x: 280, y: 320 },
         data: {
           name: 'Apache',
           status: 'healthy',
@@ -219,7 +283,7 @@ const graphs: Record<string, GraphResponse> = {
       {
         id: 'analytics-engine',
         type: 'service',
-        position: { x: 740, y: 280 },
+        position: { x: 760, y: 320 },
         data: {
           name: 'Analytics',
           status: 'healthy',
@@ -242,7 +306,7 @@ const graphs: Record<string, GraphResponse> = {
       {
         id: 'cloudflare',
         type: 'service',
-        position: { x: 520, y: 100 },
+        position: { x: 520, y: 50 },
         data: {
           name: 'Cloudflare',
           status: 'healthy',
@@ -257,7 +321,7 @@ const graphs: Record<string, GraphResponse> = {
       {
         id: 'edge-node',
         type: 'service',
-        position: { x: 300, y: 280 },
+        position: { x: 200, y: 320 },
         data: {
           name: 'Edge Node',
           status: 'healthy',
@@ -272,7 +336,7 @@ const graphs: Record<string, GraphResponse> = {
       {
         id: 'vercel',
         type: 'service',
-        position: { x: 520, y: 280 },
+        position: { x: 520, y: 320 },
         data: {
           name: 'Vercel',
           status: 'healthy',
@@ -287,7 +351,7 @@ const graphs: Record<string, GraphResponse> = {
       {
         id: 'workers',
         type: 'service',
-        position: { x: 740, y: 280 },
+        position: { x: 840, y: 320 },
         data: {
           name: 'Workers',
           status: 'degraded',
@@ -540,7 +604,12 @@ export const fetchApps = (shouldFail: boolean) => withLatency(apps, shouldFail)
 
 export const fetchGraph = (appId: string, shouldFail: boolean) => {
   const graph = graphs[appId] ?? graphs['supertokens-golang']
-  return withLatency(graph, shouldFail)
+  // Auto-arrange nodes dynamically
+  const arrangedGraph = {
+    ...graph,
+    nodes: autoArrangeNodes(graph.nodes)
+  }
+  return withLatency(arrangedGraph, shouldFail)
 }
 
 export const statusLabel: Record<ServiceStatus, string> = {

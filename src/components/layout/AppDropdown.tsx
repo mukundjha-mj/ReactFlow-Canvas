@@ -12,7 +12,9 @@ interface AppDropdownProps {
   isOpen: boolean
   onToggle: () => void
   onSelect: (id: string) => void
+  onCreateApp: () => void
   onRetry: () => void
+  isDarkMode: boolean
 }
 
 export function AppDropdown({ 
@@ -23,37 +25,61 @@ export function AppDropdown({
   isOpen, 
   onToggle, 
   onSelect, 
-  onRetry 
+  onCreateApp,
+  onRetry,
+  isDarkMode 
 }: AppDropdownProps) {
   const selectedApp = apps?.find(app => app.id === selectedAppId)
   
   return (
     <aside 
-      className="absolute left-2 top-14 sm:left-4 sm:top-16 lg:left-20 lg:top-4 z-10 w-[calc(100vw-1rem)] sm:w-[340px] flex flex-col rounded-2xl border border-white/[0.06] shadow-[0_8px_32px_rgba(0,0,0,0.8)] backdrop-blur-md" 
-      style={{ background: 'rgba(0, 0, 0, 0.8)' }}
+      className="absolute left-2 top-14 sm:left-4 sm:top-16 lg:left-20 lg:top-4 z-10 w-[calc(100vw-1rem)] sm:w-[340px] flex flex-col rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.8)] backdrop-blur-md" 
+      style={{ 
+        background: isDarkMode ? 'rgba(0, 0, 0, 0.8)' : 'rgba(255, 255, 255, 0.95)',
+        border: isDarkMode ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.1)'
+      }}
     >
       {/* Dropdown Header */}
-      <button
+      <div
         onClick={onToggle}
-        className="flex items-center justify-between gap-2 border-b border-white/[0.06] px-3 py-2.5 sm:px-4 sm:py-3 text-left transition-colors hover:bg-white/[0.04]"
+        className="flex items-center justify-between gap-2 px-3 py-2.5 sm:px-4 sm:py-3 cursor-pointer transition-colors"
+        style={{
+          borderBottom: isDarkMode ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.1)',
+          background: 'transparent'
+        }}
+        onMouseEnter={(e) => e.currentTarget.style.background = isDarkMode ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)'}
+        onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
       >
         <div className="flex items-center gap-2">
           <div className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-blue-700">
             {getAppIcon({ iconName: selectedApp?.icon, className: "h-4 w-4 sm:h-5 sm:w-5 text-white" })}
           </div>
-          <span className="text-xs sm:text-sm font-medium text-white truncate max-w-[150px] sm:max-w-none">
+          <span className="text-xs sm:text-sm font-medium truncate max-w-[150px] sm:max-w-none" style={{ color: isDarkMode ? '#ffffff' : '#000000' }}>
             {selectedApp?.name || 'supertokens-golang'}
           </span>
         </div>
         <div className="flex items-center gap-1">
           <ChevronDown
-            className={cn("h-4 w-4 text-gray-400 transition-transform", isOpen && "rotate-180")}
+            className={cn("h-4 w-4 transition-transform", isOpen && "rotate-180")}
+            style={{ color: isDarkMode ? '#9ca3af' : '#6b7280' }}
           />
-          <button className="rounded p-1 text-gray-400 transition-colors hover:bg-white/[0.08] hover:text-white">
+          <button 
+            onClick={(e) => e.stopPropagation()}
+            className="rounded p-1 transition-colors"
+            style={{ color: isDarkMode ? '#9ca3af' : '#6b7280' }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = isDarkMode ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'
+              e.currentTarget.style.color = isDarkMode ? '#ffffff' : '#000000'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'transparent'
+              e.currentTarget.style.color = isDarkMode ? '#9ca3af' : '#6b7280'
+            }}
+          >
             <MoreVertical className="h-4 w-4" />
           </button>
         </div>
-      </button>
+      </div>
 
       {/* Dropdown Content */}
       <div
@@ -70,6 +96,8 @@ export function AppDropdown({
             onRetry={onRetry}
             selectedAppId={selectedAppId}
             onSelect={onSelect}
+            onCreateApp={onCreateApp}
+            isDarkMode={isDarkMode}
           />
         </div>
       </div>
