@@ -1,5 +1,4 @@
 import type { ReactFlowInstance } from '@xyflow/react'
-import { cn } from '../../lib/utils'
 import { getServiceLogo } from '../../utils/getServiceLogo'
 import type { ServiceNode } from '../../types'
 import { Plus } from 'lucide-react'

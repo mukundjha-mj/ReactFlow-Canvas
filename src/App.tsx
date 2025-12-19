@@ -225,7 +225,6 @@ function App() {
             const providers = ['aws', 'gcp', 'azure']
             const randomProvider = providers[Math.floor(Math.random() * providers.length)]
             
-            const viewport = instance?.getViewport() || { x: 0, y: 0, zoom: 1 }
             const existingNodes = nodes
             let newX = 520
             let newY = 200
@@ -360,6 +359,7 @@ function App() {
                 setSelectedNodeId(null)
                 toggleMobilePanel(false)
               }}
+              onCreateApp={() => setIsCreateAppDialogOpen(true)}
               onDeleteApp={(id) => {
                 queryClient.setQueryData<AppInfo[]>(['apps', shouldFail], (oldApps) => {
                   if (!oldApps) return []
