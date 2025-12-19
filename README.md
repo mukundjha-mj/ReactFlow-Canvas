@@ -7,6 +7,8 @@ A modern, interactive application graph builder featuring a visual node editor f
 ![Vite](https://img.shields.io/badge/Vite-7.2-646CFF?logo=vite)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
+> **📖 Architecture Deep Dive**: See [reasoning.md](reasoning.md) for detailed explanation of component refactoring decisions and architectural choices.
+
 ## ✨ Features
 
 ### 🎨 Interactive Canvas
